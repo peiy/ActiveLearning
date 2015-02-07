@@ -1,0 +1,118 @@
+function visualizeEQNEQ (dataset, nq, nps)
+cd ..;
+ppp = {'.r', '.g', '.b', '.c', '.k'};
+qqq = {'o', 's', '^', 'p', 'd'};
+addpath ('./lib');
+cd ('Data-sets');
+cd (dataset);
+data = load ([dataset, '.data']);
+n = length(data);
+classNum = length(unique(data(:, end)));
+cd ..;
+cd ..;
+cd ('results');
+cd (dataset);
+uncertaintyFileEQ = [dataset, '-pt-new-RF-EQNEW-', num2str(nq), '-', num2str(nps), '-uncertainty.data'];
+uncertaintyFileNEQ = [dataset, '-pt-new-RF-NEQNEW-', num2str(nq), '-', num2str(nps), '-uncertainty.data'];
+consFileEQ = [dataset, '-pt-new-RF-EQNEW-', num2str(nq), '-', num2str(nps), '-constraints.data'];
+consFileNEQ = [dataset, '-pt-new-RF-NEQNEW-', num2str(nq), '-', num2str(nps), '-constraints.data'];
+uncerEQ = load (uncertaintyFileEQ);
+uncerNEQ = load (uncertaintyFileNEQ);
+consEQ = load (consFileEQ);
+consNEQ = load (consFileNEQ);
+resultFileEQ = [dataset, '-pt-new-RF-EQNEW-', num2str(nq), '-', num2str(nps), '.data'];
+resultFileNEQ = [dataset, '-pt-new-RF-NEQNEW-', num2str(nq), '-', num2str(nps), '.data'];
+resultEQ = load (resultFileEQ);
+temp = find (resultEQ (:, 6) == nq);
+resultEQ = resultEQ (1:temp(1), :);
+resultNEQ = load (resultFileNEQ);
+temp = find (resultNEQ (:, 6) == nq);
+resultNEQ = resultNEQ (1:temp(1), :);
+clusterFileEQ = [dataset, '-pt-new-RF-EQNEW-', num2str(nq), '-', num2str(nps), '-cluster.data'];
+clusterFileNEQ = [dataset, '-pt-new-RF-NEQNEW-', num2str(nq), '-', num2str(nps), '-cluster.data'];
+clusterEQ = load (clusterFileEQ);
+clusterNEQ = load (clusterFileNEQ);
+cd ..;
+cd ..;
+neighborEQ = cons2neighbor (consEQ (1:nq, :), data);
+neighborNEQ = cons2neighbor (consNEQ (1:nq, :), data);
+cd ('visualization');
+mkdir (dataset);
+cd (dataset);
+figure (1);
+for j = 1:classNum
+    plot (data (data (:, end) == j, 1), data (data(:, end) == j, 2), ppp{j});
+    hold on;      
+end
+
+
+
+figure (2);
+for i = 2:30
+    for j = 1:size(neighborEQ, 1)
+        if (length(find (neighborEQ (j,2:end)~=0)) == i)
+            rowEQ = j;
+            break;
+        end
+    end  
+    for j = 1:size(neighborNEQ, 1)
+        if (length(find (neighborNEQ (j,2:end)~=0)) == i)
+            rowNEQ = j;
+            break;
+        end
+    end  
+    clusterEQOne = clusterEQ ((rowEQ-1)*n+1:rowEQ*n);
+    clusterNEQOne = clusterNEQ ((rowNEQ-1)*n+1:rowNEQ*n);
+    uncerEQOne = uncerEQ ((rowEQ-1)*n+1:rowEQ*n);
+    uncerNEQOne = uncerNEQ ((rowNEQ-1)*n+1:rowNEQ*n);
+    neighborEQNum = max (neighborEQ (rowEQ, 2:end));
+    neighborNEQNum = max (neighborNEQ (rowNEQ, 2:end));
+    clf; 
+    subplot (2,1,1);
+    for j = 1:classNum
+        plot (data (clusterEQOne == j, 1), data (clusterEQOne == j, 2), ppp{j});
+        hold on;      
+    end
+    for j = 1:neighborEQNum
+        plot (data(neighborEQ (rowEQ, 2:end) == j, 1), data(neighborEQ (rowEQ, 2:end) == j, 2), qqq{j});
+        hold on;
+    end
+    uncerEQOne
+    for j = 1:size(data, 1)
+        if uncerEQOne(j) ~= -1 && uncerEQOne(j) ~= -0
+            text (data (j, 1), data (j, 2), uncerEQOne (j));
+        end
+     end
+    acc = resultEQ (resultEQ (:, 6) == neighborEQ (rowEQ, 1), 3);
+    title (['Normalized Uncertainty ACC=', num2str(acc), ' # of Pts=', num2str(i)]);
+    subplot (2,1,2);
+    for j = 1:classNum
+        plot (data (clusterNEQOne == j, 1), data (clusterNEQOne == j, 2), ppp{j});
+        hold on;      
+    end
+    for j = 1:neighborNEQNum
+        plot (data(neighborNEQ (rowNEQ, 2:end) == j, 1), data(neighborNEQ (rowNEQ, 2:end) == j, 2), qqq{j});
+        hold on;
+    end
+    for j = 1:size(data, 1)
+        if uncerNEQOne(j) ~= 0 && uncerNEQOne(j) ~= -1
+            plot (data (j, 1), data (j, 2), uncerNEQOne (j));
+        end
+    end
+    acc = resultNEQ (resultNEQ (:, 6) == neighborNEQ (rowNEQ, 1), 3);
+    title (['Uncertainty ACC=', num2str(acc), ' # of Pts=', num2str(i)]);
+    pause;
+
+end
+
+
+cd ..;
+
+
+
+
+
+
+
+
+end
