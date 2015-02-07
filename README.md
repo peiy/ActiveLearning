@@ -1,5 +1,5 @@
 # ActiveLearning
-The code of methods of active learning for pairwise constraints and relative comparisons in the following two papers:
+The code for active learning of pairwise constraints and relative comparisons in the following two papers:
 
 Sicheng Xiong, Javad Azimi and Xiaoli Z. Fern. Active learning of constraints for semi-supervised clustering, IEEE Transactions on Knowledge on Data Engineering 26(1): 43-54 (2014)
 
